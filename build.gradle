@@ -35,6 +35,7 @@ ext {
     compileSdkVersion = 29
     versionCode = 1
     versionName = '1.0.0'
+    ndkVersion = '20.1.5948944'
 
     publishGroupId = 'com.mxplay.code'
     publishVersion = "0.0.1.${getBuildNumber()}"

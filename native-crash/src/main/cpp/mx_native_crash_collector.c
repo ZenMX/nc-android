@@ -9,7 +9,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <time.h>
-#include <threads.h>
+//#include <threads.h>
 #include <unwind.h>
 
 static pthread_key_t keyJvmDetach;
