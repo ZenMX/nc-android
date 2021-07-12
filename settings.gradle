@@ -1,0 +1,3 @@
+rootProject.name = "nc-android"
+include ':app'
+include ':native-crash'
