@@ -169,7 +169,7 @@ static const char *find_name(const char *lib_name) {
     return name;
 }
 
-/*
+
 static void mx_write_to_file(const char *content) {
     time_t rawtime;
     time(&rawtime);
@@ -178,9 +178,9 @@ static void mx_write_to_file(const char *content) {
     memset(path, 0, 1024);
 
 #if defined(__LP64__)
-    sprintf(path, "%s/%s_%ld.txt", targetDir, "crash", rawtime);
+    sprintf(path, "%s/%s_%ld.txt", targetDir, "nc", rawtime);
 #else
-    sprintf(path, "%s/%s_%d.log", targetDir, "crash", rawtime);
+    sprintf(path, "%s/%s_%d.txt", targetDir, "nc", rawtime);
 #endif
 
     FILE *pFile = fopen(path, "w");
@@ -192,7 +192,7 @@ static void mx_write_to_file(const char *content) {
 
     fclose(pFile);
 }
-*/
+
 
 /*
 static void mx_write(const char *lib_name, int code, int si_code, uintptr_t pc) {
@@ -251,7 +251,7 @@ static inline void format(char* str, const char* libName, const char* symbol, vo
 }
 
 static void mx_signal_handle(int code, siginfo_t *si, void *t) {
-    
+//    __android_log_print(6, "test", "mx_signal_handle %d", code);
     int strSize = 1920;
     char stackStr[strSize];
     memset(stackStr, 0, strSize);
@@ -273,8 +273,6 @@ static void mx_signal_handle(int code, siginfo_t *si, void *t) {
         str = &stackStr[strlen(stackStr)];
 //        mx_write(info.dli_fname, code, si->si_code, addr_relative);
     }
-
-//    dump_backtrace();
 
     const size_t count = 30;
     void* buffer[count];
@@ -303,11 +301,16 @@ static void mx_signal_handle(int code, siginfo_t *si, void *t) {
         }
     }
 
-//    mx_write_to_file(path);
+//    __android_log_print(6, "test", "mx_signal_handle %s", stackStr);
     JNIEnv *env = fromVM();
 
     jstring log = (*env)->NewStringUTF(env, stackStr);
     (*env)->CallStaticVoidMethod(env, callbackClass, callbackMethod, log);
+    jboolean check = (*env)->ExceptionCheck(env);
+    if (check) {
+//        __android_log_print(6, "test", "mx_signal_handle write to file %s", targetDir);
+        mx_write_to_file(stackStr);
+    }
 
     for (int i = 0; i < SIGNALS_LEN; i++) {
         if (signal_array[i] == code) {
@@ -363,16 +366,16 @@ JNIEXPORT void mx_crash_collect_init(const char *dir) {
 JNIEXPORT void JNICALL
 Java_com_mxtech_NativeCrashCollector_nativeInitClass(
         JNIEnv *env,
-        jclass clazz) {
+        jclass clazz, jstring dir) {
     callbackClass = (*env)->NewGlobalRef(env, clazz);
 //    callbackClass = clazz;
     callbackMethod = (*env)->GetStaticMethodID(env, clazz, "onNativeCrash",
                                                "(Ljava/lang/String;)V");
     (*env)->GetJavaVM(env, &callbackVM);
-//    jboolean copy;
-//    const char *dirStr = (*env)->GetStringUTFChars(env, dir, &copy);
+    jboolean copy;
+    const char *dirStr = (*env)->GetStringUTFChars(env, dir, &copy);
 //
-    mx_crash_collect_init("/sdcard/test1/hls");
+    mx_crash_collect_init(dirStr);
 
-//    (*env)->ReleaseStringUTFChars(env, dir, dirStr);
+    (*env)->ReleaseStringUTFChars(env, dir, dirStr);
 }
