@@ -19,12 +19,14 @@ void test_stack_over_flow(int a) {
 void mx_test_crash(int type) {
     switch (type) {
         case CRASH_TYPE_NPE: {
+            __android_log_print(6, "test", "test crash type %d", type);
             int* p = nullptr;
             int a = *p;
             break;
         }
 
         case CRASH_TYPE_STACK_OVER_FLOW: {
+            __android_log_print(6, "test", "test crash type %d", type);
             test_stack_over_flow(0);
             break;
         }
