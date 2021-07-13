@@ -87,6 +87,19 @@ JNIEnv *fromVM() {
 
     int err = (*callbackVM)->GetEnv(callbackVM, (void **) &env, JNI_VERSION_1_2);
     if (err != JNI_OK) {
+
+    }
+
+    return env;
+}
+
+/*
+JNIEnv *fromVM() {
+    JNIEnv *env = NULL;
+
+    int err = (*callbackVM)->GetEnv(callbackVM, (void **) &env, JNI_VERSION_1_2);
+    __android_log_print(6, "test", "fromVM %d %d", err, __LINE__);
+    if (err != JNI_OK) {
         if (err != JNI_EDETACHED) {
             if (err == JNI_EVERSION) {
             } else {
@@ -94,11 +107,13 @@ JNIEnv *fromVM() {
         }
 
         err = (*callbackVM)->AttachCurrentThread(callbackVM, &env, NULL);
+        __android_log_print(6, "test", "fromVM %d %d", err, __LINE__);
         if (err != JNI_OK) {
         }
 
         // Register detach function on thread exit.
         err = pthread_setspecific(keyJvmDetach, callbackVM);
+        __android_log_print(6, "test", "fromVM %d %d", err, __LINE__);
         if (err != 0) {
         }
 
@@ -106,6 +121,7 @@ JNIEnv *fromVM() {
 
     return env;
 }
+*/
 
 static inline uintptr_t pc_from_ucontext(ucontext_t *uc) {
 #if defined(__aarch64__)
@@ -251,11 +267,14 @@ static inline void format(char* str, const char* libName, const char* symbol, vo
 }
 
 static void mx_signal_handle(int code, siginfo_t *si, void *t) {
-//    __android_log_print(6, "test", "mx_signal_handle %d", code);
+    __android_log_print(6, "nc", "mx_signal_handle %d %d", code, si->si_code);
     int strSize = 1920;
     char stackStr[strSize];
     memset(stackStr, 0, strSize);
     char* str = &stackStr[0];
+
+    sprintf(str, "signal %d code %d\n", code, si->si_code);
+    str = &stackStr[strlen(stackStr)];
 
     uintptr_t pc = pc_from_ucontext((ucontext_t *) t);
 
@@ -303,12 +322,14 @@ static void mx_signal_handle(int code, siginfo_t *si, void *t) {
 
 //    __android_log_print(6, "test", "mx_signal_handle %s", stackStr);
     JNIEnv *env = fromVM();
-
-    jstring log = (*env)->NewStringUTF(env, stackStr);
-    (*env)->CallStaticVoidMethod(env, callbackClass, callbackMethod, log);
-    jboolean check = (*env)->ExceptionCheck(env);
+    jboolean check = 1;
+    if (env != NULL) {
+        jstring log = (*env)->NewStringUTF(env, stackStr);
+        (*env)->CallStaticVoidMethod(env, callbackClass, callbackMethod, log);
+        check = (*env)->ExceptionCheck(env);
+    }
+//    __android_log_print(6, "test", "mx_signal_handle write to file %s", targetDir);
     if (check) {
-//        __android_log_print(6, "test", "mx_signal_handle write to file %s", targetDir);
         mx_write_to_file(stackStr);
     }
 
