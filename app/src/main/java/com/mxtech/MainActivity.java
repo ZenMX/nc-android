@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         File externalCacheDir = getExternalCacheDir();
         File nc = new File(externalCacheDir, "nc");
 
-        NativeCrashCollector.init("/sdcard/test1/nc", new NativeCrashCollector.Callback() {
+        NativeCrashCollector.init(getApplicationContext(), null, new NativeCrashCollector.Callback() {
             @Override
             public void onNativeCrash(@NonNull Exception exception) {
                 exception.printStackTrace();

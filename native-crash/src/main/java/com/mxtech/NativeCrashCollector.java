@@ -1,10 +1,16 @@
 package com.mxtech;
 
+import android.content.Context;
+
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import okio.BufferedSource;
 import okio.Okio;
@@ -22,19 +28,30 @@ public class NativeCrashCollector {
     private static Callback s_callback = null;
     private static File crashDir = null;
 
-    public static void init(String dir, Callback callback) {
-        s_callback = callback;
-        crashDir = new File(dir);
-        crashDir.mkdirs();
-        nativeInitClass(dir);
+    public static void init(Context context, Executor executor, Callback callback) {
+        if (executor == null) {
+            ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1,
+                    0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<Runnable>());
+            threadPoolExecutor.setKeepAliveTime(1, TimeUnit.SECONDS);
+            threadPoolExecutor.allowCoreThreadTimeOut(true);
 
-        new Thread(new Runnable() {
+            executor = threadPoolExecutor;
+        }
+
+        s_callback = callback;
+        crashDir = new File(context.getExternalCacheDir(), "nc");
+
+        crashDir.mkdirs();
+        nativeInitClass(crashDir.getAbsolutePath());
+
+        executor.execute(new Runnable() {
             @Override
             public void run() {
                 listNativeCrash();
                 listNativeAndJavaCrash();
             }
-        }).start();
+        });
     }
 
     private static void listNativeCrash() {

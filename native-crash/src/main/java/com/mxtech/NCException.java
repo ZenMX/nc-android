@@ -76,8 +76,8 @@ public class NCException extends Exception {
     @Override
     public void printStackTrace(@NonNull PrintStream printStream) {
         synchronized (printStream) {
-            String s = this.toString();
-            printStream.println(s + ": " + msg);
+//            String s = this.toString();
+            printStream.println(this);
 //            printStream.println(msg);
 //            for (String str: split) {
 //                printStream.println("\tat " + str);
