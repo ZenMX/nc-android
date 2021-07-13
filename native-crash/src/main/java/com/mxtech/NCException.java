@@ -28,6 +28,11 @@ public class NCException extends Exception {
         super();
     }
 
+    @Override
+    public String getMessage() {
+        return msg;
+    }
+
     public NCException(String nativeStack, StackTraceElement[] traceElements) {
         super();
         LinkedList<StackTraceElement> list = new LinkedList<>();
