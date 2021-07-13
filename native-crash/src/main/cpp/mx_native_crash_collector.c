@@ -12,7 +12,7 @@
 //#include <threads.h>
 #include <unwind.h>
 
-static pthread_key_t keyJvmDetach;
+//static pthread_key_t keyJvmDetach;
 
 static jmethodID callbackMethod = NULL;
 static jclass callbackClass = NULL;
@@ -145,18 +145,18 @@ static inline uintptr_t pc_from_ucontext(ucontext_t *uc) {
 #endif
 }
 
-static int arch() {
+static const char* arch() {
 #if defined(__aarch64__)
-    return 1;
+    return "arm64";
 #elif (defined(__arm__))
-    return 0;
+    return "armv7";
 #elif (defined(__x86_64__))
-    return 2;
+    return "x86_64";
 #elif (defined(__i386))
-  return 3;
+  return "x86";
 #endif
 
-    return 9;
+    return "unknown";
 }
 
 static const int signal_array[] = {SIGILL, SIGABRT, SIGBUS, SIGFPE, SIGSEGV, SIGSTKFLT, SIGSYS};
@@ -193,11 +193,11 @@ static void mx_write_to_file(const char *content) {
     char path[1024];
     memset(path, 0, 1024);
 
-#if defined(__LP64__)
+//#if defined(__LP64__)
     sprintf(path, "%s/%s_%ld.txt", targetDir, "nc", rawtime);
-#else
-    sprintf(path, "%s/%s_%d.txt", targetDir, "nc", rawtime);
-#endif
+//#else
+//    sprintf(path, "%s/%s_%ld.txt", targetDir, "nc", rawtime);
+//#endif
 
     FILE *pFile = fopen(path, "w");
     if (pFile == NULL)
@@ -273,7 +273,7 @@ static void mx_signal_handle(int code, siginfo_t *si, void *t) {
     memset(stackStr, 0, strSize);
     char* str = &stackStr[0];
 
-    sprintf(str, "signal %d code %d\n", code, si->si_code);
+    sprintf(str, "arch %s signal %d code %d\n", arch(), code, si->si_code);
     str = &stackStr[strlen(stackStr)];
 
     uintptr_t pc = pc_from_ucontext((ucontext_t *) t);
@@ -302,7 +302,7 @@ static void mx_signal_handle(int code, siginfo_t *si, void *t) {
 
     for (size_t idx = 0; idx < max; ++idx) {
         const void* addr = buffer[idx];
-        const char* symbol = "";
+        const char* symbol;
 
         Dl_info info1;
         if (dladdr(addr, &info1) && info1.dli_fname != NULL) {
