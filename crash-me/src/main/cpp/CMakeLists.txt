@@ -10,6 +10,7 @@ cmake_minimum_required(VERSION 3.10.2)
 project("crash-me")
 
 add_compile_options(-fPIC)
+add_compile_options("-O0")
 
 add_library( # Sets the name of the library.
              mx-crash-me
