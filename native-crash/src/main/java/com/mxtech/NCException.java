@@ -3,16 +3,40 @@ package com.mxtech;
 import androidx.annotation.NonNull;
 
 import java.io.PrintStream;
+import java.util.Arrays;
+import java.util.LinkedList;
 
 public class NCException extends Exception {
 
     private final StackTraceElement[] traceElements;
-    private final String[] split;
+    private String msg;
 
     public NCException(String nativeStack, StackTraceElement[] traceElements) {
         super();
-        split = nativeStack.split("\n");
-        this.traceElements = traceElements;
+        LinkedList<StackTraceElement> list = new LinkedList<>();
+        String[] split = nativeStack.split("\n");
+        for (int i = 0; i < split.length; i++) {
+            if (i == 0) {
+                msg = split[i];
+            } else {
+                String str = split[i];
+                String[] splitLine = str.split(":");
+                if (splitLine.length == 3) {
+                    String lib = splitLine[0];
+                    String function = splitLine[1];
+                    String address = splitLine[2];
+                    StackTraceElement stackTraceElement = new StackTraceElement(lib, function + ':' + address, null, -2);
+                    list.add(stackTraceElement);
+                }
+            }
+
+        }
+
+        if (traceElements != null) {
+            list.addAll(Arrays.asList(traceElements));
+        }
+
+        this.traceElements = list.toArray(new StackTraceElement[0]);
     }
 
 
@@ -26,11 +50,12 @@ public class NCException extends Exception {
     @Override
     public void printStackTrace(@NonNull PrintStream printStream) {
         synchronized (printStream) {
-            printStream.println(this);
-
-            for (String str: split) {
-                printStream.println("\tat " + str);
-            }
+            String s = this.toString();
+            printStream.println(s + ": " + msg);
+//            printStream.println(msg);
+//            for (String str: split) {
+//                printStream.println("\tat " + str);
+//            }
 
 
             for (StackTraceElement traceElement : traceElements) {
