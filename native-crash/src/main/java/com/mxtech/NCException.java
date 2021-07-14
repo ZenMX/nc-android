@@ -58,6 +58,8 @@ public class NCException extends Exception {
             list.addAll(Arrays.asList(traceElements));
         }
 
+
+        list.add(0, fakeTrace());
         this.traceElements = list.toArray(new StackTraceElement[0]);
     }
 
@@ -89,6 +91,10 @@ public class NCException extends Exception {
             }
             printStream.println();
         }
+    }
+
+    private static StackTraceElement fakeTrace() {
+        return new StackTraceElement(NCException.class.getName(), "fakeMethod", "NCException.java", -2);
     }
 
     public static NCException createFromFile(File file) throws IOException {
