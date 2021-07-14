@@ -47,7 +47,7 @@ public class NCException extends Exception {
                     String lib = splitLine[0];
                     String function = splitLine[1];
                     String address = splitLine[2];
-                    StackTraceElement stackTraceElement = new StackTraceElement(lib, function + ':' + address, null, -2);
+                    StackTraceElement stackTraceElement = new StackTraceElement(lib, function + ':' + address, lib, -2);
                     list.add(stackTraceElement);
                 }
             }
@@ -59,7 +59,7 @@ public class NCException extends Exception {
         }
 
 
-        list.add(0, fakeTrace());
+//        list.add(0, fakeTrace());
         this.traceElements = list.toArray(new StackTraceElement[0]);
     }
 
