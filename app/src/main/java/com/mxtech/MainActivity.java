@@ -7,6 +7,7 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.util.Log;
 import android.view.View;
 
 import androidx.navigation.NavController;
@@ -40,7 +41,8 @@ public class MainActivity extends AppCompatActivity {
         NativeCrashCollector.init(getApplicationContext(), null, new NativeCrashCollector.Callback() {
             @Override
             public void onNativeCrash(@NonNull Exception exception) {
-                exception.printStackTrace();
+                Log.e("test", "native crash", exception);
+//                exception.printStackTrace();
             }
         });
 

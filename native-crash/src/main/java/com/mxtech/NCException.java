@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.util.Arrays;
 import java.util.LinkedList;
 
@@ -54,8 +55,45 @@ public class NCException extends Exception {
 
         }
 
+        //filter dirty native stack trace
+        if (list.size() > 4) {
+            int index = -1;
+            for (int i = 0; i < list.size(); i++) {
+                StackTraceElement stackTraceElement = list.get(i);
+                if (stackTraceElement.getMethodName().startsWith("__kernel_rt_sigreturn")) {
+                    index = i;
+                    break;
+                }
+            }
+
+            if (index != -1) {
+                if (TextUtils.equals(list.get(0).getClassName(), list.get(index + 1).getClassName())
+                        && TextUtils.equals(list.get(0).getMethodName(), list.get(index + 1).getMethodName())
+                ) {
+                    for (int i = 0; i <= index; i++) {
+                        list.remove(0);
+                    }
+                }
+            }
+        }
+
+
         if (traceElements != null) {
-            list.addAll(Arrays.asList(traceElements));
+            //filter dirty java stack trace
+            int index = -1;
+            for (int i = 0; i < traceElements.length; i++) {
+                StackTraceElement traceElement = traceElements[i];
+                if (index == -1) {
+                    if (TextUtils.equals(traceElement.getClassName(), "com.mxtech.NativeCrashCollector")
+                            && TextUtils.equals(traceElement.getMethodName(), "onNativeCrash")){
+                        index = i;
+                    }
+                } else {
+                    list.add(traceElement);
+                }
+            }
+
+//            list.addAll(Arrays.asList(traceElements));
         }
 
 
@@ -74,17 +112,28 @@ public class NCException extends Exception {
         return traceElements;
     }
 
+    @Override
+    public void printStackTrace() {
+        super.printStackTrace();
+    }
+
+    @Override
+    public void printStackTrace(PrintWriter printStream) {
+        synchronized (printStream) {
+            printStream.println(this);
+
+            for (StackTraceElement traceElement : traceElements) {
+                printStream.println("\tat " + traceElement);
+            }
+            printStream.println();
+        }
+    }
+
     @SuppressWarnings("SynchronizationOnLocalVariableOrMethodParameter")
     @Override
     public void printStackTrace(@NonNull PrintStream printStream) {
         synchronized (printStream) {
-//            String s = this.toString();
             printStream.println(this);
-//            printStream.println(msg);
-//            for (String str: split) {
-//                printStream.println("\tat " + str);
-//            }
-
 
             for (StackTraceElement traceElement : traceElements) {
                 printStream.println("\tat " + traceElement);

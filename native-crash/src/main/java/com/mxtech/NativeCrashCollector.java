@@ -76,7 +76,7 @@ public class NativeCrashCollector {
                 source.close();
                 file1.delete();
                 String s = new String(bytes);
-                NCException ncException = createNcException(s);
+                NCException ncException = new NCException(s, null);
                 callback(ncException);
 //                        onNativeCrash(s);
             } catch (Exception e) {
@@ -113,7 +113,7 @@ public class NativeCrashCollector {
 
     @Keep
     private static void onNativeCrash(String log) {
-        NCException ncException = createNcException(log);
+        NCException ncException = new NCException(log, Thread.currentThread().getStackTrace());
 
         File dir = new File(s_crashDir, "nc_java");
         dir.mkdirs();
@@ -131,13 +131,6 @@ public class NativeCrashCollector {
     private static void callback(NCException e) {
         s_callback.onNativeCrash(e);
     }
-    @NonNull
-    private static NCException createNcException(String log) {
-        return new NCException(log, Thread.currentThread().getStackTrace());
-    }
-
-
-
 
 
     private static native void nativeInitClass(String dir);
