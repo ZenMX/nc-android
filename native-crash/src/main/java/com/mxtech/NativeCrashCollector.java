@@ -26,7 +26,8 @@ public class NativeCrashCollector {
     }
 
     private static Callback s_callback = null;
-    private static File crashDir = null;
+    private static File s_crashDir = null;
+    private static Executor s_executor = null;
 
     public static void init(Context context, Executor executor, Callback callback) {
         if (executor == null) {
@@ -39,13 +40,16 @@ public class NativeCrashCollector {
             executor = threadPoolExecutor;
         }
 
+        s_executor = executor;
         s_callback = callback;
-        crashDir = new File(context.getExternalCacheDir(), "nc");
+        s_crashDir = new File(context.getExternalCacheDir(), "nc");
 
-        crashDir.mkdirs();
-        nativeInitClass(crashDir.getAbsolutePath());
+        s_crashDir.mkdirs();
+        nativeInitClass(s_crashDir.getAbsolutePath());
+    }
 
-        executor.execute(new Runnable() {
+    public static void startReport() {
+        s_executor.execute(new Runnable() {
             @Override
             public void run() {
                 listNativeCrash();
@@ -55,7 +59,7 @@ public class NativeCrashCollector {
     }
 
     private static void listNativeCrash() {
-        File[] files = crashDir.listFiles();
+        File[] files = s_crashDir.listFiles();
         if (files == null)
             return;
 
@@ -82,7 +86,7 @@ public class NativeCrashCollector {
         }
     }
     private static void listNativeAndJavaCrash() {
-        File dir = new File(crashDir, "nc_java");
+        File dir = new File(s_crashDir, "nc_java");
         File[] files = dir.listFiles();
         if (files == null)
             return;
@@ -111,7 +115,7 @@ public class NativeCrashCollector {
     private static void onNativeCrash(String log) {
         NCException ncException = createNcException(log);
 
-        File dir = new File(crashDir, "nc_java");
+        File dir = new File(s_crashDir, "nc_java");
         dir.mkdirs();
         long now = System.currentTimeMillis();
         String fileName = "nc_" + now + ".txt";
