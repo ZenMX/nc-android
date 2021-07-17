@@ -48,8 +48,8 @@ ext {
     ndkVersion = '20.1.5948944'
 
     publishGroupId = 'com.mxplay.code'
-    publishVersion = "0.9.0.${getBuildNumber()}"
-    publishVersionCode = 9
+    publishVersion = "1.0.0.${getBuildNumber()}"
+    publishVersionCode = 10
     publishScript = 'https://raw.githubusercontent.com/ZenMX/mavenPublisher/master/publish.gradle'
 //    publishScript = '../publish.gradle'
 }
