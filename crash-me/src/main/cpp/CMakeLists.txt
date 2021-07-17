@@ -38,8 +38,6 @@ find_library( # Sets the name of the path variable.
               # you want CMake to locate.
               log )
 
-find_library( z-lib z)
-
 #string(TOLOWER "${CMAKE_BUILD_TYPE}" build_type)
 #if(build_type MATCHES "^rel")
 #    set_target_properties(native-lib PROPERTIES CXX_VISIBILITY_PRESET hidden)
@@ -55,5 +53,4 @@ target_link_libraries( # Specifies the target library.
                        # Links the target library to the log library
                        # included in the NDK.
                        ${log-lib}
-                       ${z-lib}
         )
