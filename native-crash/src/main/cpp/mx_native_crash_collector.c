@@ -25,7 +25,7 @@ typedef struct backtrace_state_t {
 /**
  * callback used when using <unwind.h> to get the trace for the current context
  */
-_Unwind_Reason_Code unwind_callback(struct _Unwind_Context *context, void *arg) {
+static _Unwind_Reason_Code unwind_callback(struct _Unwind_Context *context, void *arg) {
     backtrace_state_t *state = (backtrace_state_t *) arg;
     _Unwind_Word pc = _Unwind_GetIP(context);
     if (pc) {
@@ -82,7 +82,7 @@ static inline void dump_backtrace() {
 }
  */
 
-JNIEnv *fromVM() {
+static JNIEnv *fromVM() {
     JNIEnv *env = NULL;
 
     int err = (*callbackVM)->GetEnv(callbackVM, (void **) &env, JNI_VERSION_1_2);
@@ -362,7 +362,7 @@ static void mx_signal_handle(int code, siginfo_t *si, void *t) {
 }
 
 
-JNIEXPORT void mx_crash_collect_init(const char *dir) {
+static void mx_crash_collect_init(const char *dir) {
 
     size_t length = strlen(dir);
     targetDir = malloc(length + 1);
