@@ -186,12 +186,12 @@ static const char *find_name(const char *lib_name) {
 }
 
 
-static void mx_write_to_file(const char *content) {
+static void mx_write_to_file(char* path, const char *content) {
     time_t rawtime;
     time(&rawtime);
 
-    char path[1024];
-    memset(path, 0, 1024);
+//    char path[1024];
+//    memset(path, 0, 1024);
 
 //#if defined(__LP64__)
     sprintf(path, "%s/%s_%ld.txt", targetDir, "nc", rawtime);
@@ -320,17 +320,22 @@ static void mx_signal_handle(int code, siginfo_t *si, void *t) {
         }
     }
 
-//    __android_log_print(6, "test", "mx_signal_handle %s", stackStr);
+    char filePath[1024];
+    memset(filePath, 0, 1024);
+
+    mx_write_to_file(filePath, stackStr);
+
     JNIEnv *env = fromVM();
     jboolean check = 1;
     if (env != NULL) {
         jstring log = (*env)->NewStringUTF(env, stackStr);
         (*env)->CallStaticVoidMethod(env, callbackClass, callbackMethod, log);
         check = (*env)->ExceptionCheck(env);
+        __android_log_print(6, "nc", "mx_signal_handle call java %d", check);
     }
-//    __android_log_print(6, "test", "mx_signal_handle write to file %s", targetDir);
-    if (check) {
-        mx_write_to_file(stackStr);
+    if (check == 0) {
+        remove(filePath);
+//        mx_write_to_file(stackStr);
     }
 
     for (int i = 0; i < SIGNALS_LEN; i++) {
