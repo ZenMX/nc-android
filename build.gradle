@@ -16,14 +16,6 @@ buildscript {
 
 allprojects {
     repositories {
-        maven {
-            url 'http://mx.nexus.com:8098/nexus/content/repositories/public2/'
-            credentials {
-                username "$System.env.MX_NEXUS_USER"
-                password "$System.env.MX_NEXUS_PW"
-            }
-        }
-
         google()
         mavenCentral()
         jcenter() // Warning: this repository is going to shut down soon
