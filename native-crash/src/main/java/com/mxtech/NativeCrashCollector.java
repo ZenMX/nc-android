@@ -1,6 +1,7 @@
 package com.mxtech;
 
 import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -17,6 +18,9 @@ import okio.Okio;
 import okio.Source;
 
 public class NativeCrashCollector {
+
+    public static final String TAG = "mx-nc";
+
     static {
         System.loadLibrary("mx-nc");
     }
@@ -28,8 +32,8 @@ public class NativeCrashCollector {
     private static Callback s_callback = null;
     private static File s_crashDir = null;
     private static Executor s_executor = null;
-
-    public static void init(Context context, Executor executor, Callback callback) {
+    private static boolean s_debug;
+    public static void init(Context context, Executor executor, Callback callback, boolean debug) {
         if (executor == null) {
             ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1,
                     0L, TimeUnit.MILLISECONDS,
@@ -40,6 +44,7 @@ public class NativeCrashCollector {
             executor = threadPoolExecutor;
         }
 
+        s_debug = debug;
         s_executor = executor;
         s_callback = callback;
         s_crashDir = new File(context.getExternalCacheDir(), "nc");
@@ -52,6 +57,8 @@ public class NativeCrashCollector {
         s_executor.execute(new Runnable() {
             @Override
             public void run() {
+                if (s_debug)
+                    Log.w(TAG, "start to report native crash.");
                 listNativeCrash();
                 listNativeAndJavaCrash();
             }
@@ -68,6 +75,9 @@ public class NativeCrashCollector {
             if (!name.startsWith("nc_") || !name.endsWith(".txt")) {
                 continue;
             }
+
+            if (s_debug)
+                Log.w(TAG, "find one native crash. " + name);
 
             try {
                 Source source = Okio.source(file1);
@@ -96,6 +106,9 @@ public class NativeCrashCollector {
             if (!name.startsWith("nc_") || !name.endsWith(".txt")) {
                 continue;
             }
+
+            if (s_debug)
+                Log.w(TAG, "find one java&native crash." + name);
 
             try {
                 NCException ncException = NCException.createFromFile(file1);
