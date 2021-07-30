@@ -33,6 +33,10 @@ public class NativeCrashCollector {
     private static File s_crashDir = null;
     private static Executor s_executor = null;
     private static boolean s_debug;
+    public static void init(Context context, Executor executor, Callback callback) {
+        init(context, executor, callback, false);
+    }
+
     public static void init(Context context, Executor executor, Callback callback, boolean debug) {
         if (executor == null) {
             ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(1, 1,
