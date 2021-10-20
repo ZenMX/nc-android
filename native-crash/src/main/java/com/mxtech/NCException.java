@@ -55,6 +55,7 @@ public class NCException extends Exception {
 
         }
 
+        /*
         //filter dirty native stack trace
         if (list.size() > 4) {
             int index = -1;
@@ -76,6 +77,8 @@ public class NCException extends Exception {
                 }
             }
         }
+
+         */
 
 
         if (traceElements != null) {
