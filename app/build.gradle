@@ -6,6 +6,7 @@ plugins {
 android {
     compileSdkVersion rootProject.compileSdkVersion
     buildToolsVersion rootProject.buildToolsVersion
+    ndkVersion rootProject.ndkVersion
 
     defaultConfig {
         applicationId "com.mxtech.nc_android"
