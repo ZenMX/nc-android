@@ -267,7 +267,7 @@ static inline void format(char* str, const char* libName, const char* symbol, vo
 }
 
 static void mx_signal_handle(int code, siginfo_t *si, void *t) {
-    __android_log_print(6, "nc", "mx_signal_handle %d %d", code, si->si_code);
+//    __android_log_print(6, "nc", "mx_signal_handle %d %d", code, si->si_code);
     int strSize = 1920;
     char stackStr[strSize];
     memset(stackStr, 0, strSize);
@@ -331,7 +331,7 @@ static void mx_signal_handle(int code, siginfo_t *si, void *t) {
         jstring log = (*env)->NewStringUTF(env, stackStr);
         (*env)->CallStaticVoidMethod(env, callbackClass, callbackMethod, log);
         check = (*env)->ExceptionCheck(env);
-        __android_log_print(6, "nc", "mx_signal_handle call java %d", check);
+//        __android_log_print(6, "nc", "mx_signal_handle call java %d", check);
     }
     if (check == 0) {
         remove(filePath);
