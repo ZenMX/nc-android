@@ -18,6 +18,8 @@ static jmethodID callbackMethod = NULL;
 static jclass callbackClass = NULL;
 static JavaVM *callbackVM = NULL;
 
+static int mx_crashCount = 0;
+
 typedef struct backtrace_state_t {
     void** current;
     void** end;
@@ -267,6 +269,17 @@ static inline void format(char* str, const char* libName, const char* symbol, vo
 }
 
 static void mx_signal_handle(int code, siginfo_t *si, void *t) {
+    mx_crashCount++;
+
+    if (mx_crashCount >= 2) {
+        for (int i = 0; i < SIGNALS_LEN; i++) {
+            if (signal_array[i] == code) {
+                old_signal_handlers[i].sa_sigaction(code, si, t);
+                break;
+            }
+        }
+        return;
+    }
 //    __android_log_print(6, "nc", "mx_signal_handle %d %d", code, si->si_code);
     int strSize = 1920;
     char stackStr[strSize];
